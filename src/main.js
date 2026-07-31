@@ -55,6 +55,7 @@ async function initialize() {
       authority: `https://login.microsoftonline.com/${entraConfig.tenantId}`,
       redirectUri: window.location.origin,
       postLogoutRedirectUri: window.location.origin,
+      navigateToLoginRequestUrl: false,
     },
     cache: {
       cacheLocation: "sessionStorage",
@@ -63,14 +64,18 @@ async function initialize() {
 
   await msalInstance.initialize();
 
-  const accounts = msalInstance.getAllAccounts();
-  const activeAccount = msalInstance.getActiveAccount() || accounts[0] || null;
+  const redirectResponse = await msalInstance.handleRedirectPromise();
+  const account =
+    redirectResponse?.account ||
+    msalInstance.getActiveAccount() ||
+    msalInstance.getAllAccounts()[0] ||
+    null;
 
-  if (activeAccount) {
-    msalInstance.setActiveAccount(activeAccount);
+  if (account) {
+    msalInstance.setActiveAccount(account);
   }
 
-  render(activeAccount);
+  render(account);
 }
 
 elements.signInButton.addEventListener("click", async () => {
@@ -78,19 +83,14 @@ elements.signInButton.addEventListener("click", async () => {
   elements.signInButton.disabled = true;
 
   try {
-    const response = await msalInstance.loginPopup({
+    await msalInstance.loginRedirect({
       scopes: ["openid", "profile", "email"],
       prompt: "select_account",
     });
-
-    msalInstance.setActiveAccount(response.account);
-    render(response.account);
   } catch (error) {
-    if (error?.errorCode !== "user_cancelled") {
-      console.error(error);
-      showError("Microsoft sign-in did not complete. Check the app registration and redirect address.");
-    }
-  } finally {
+    console.error(error);
+    const detail = error?.errorCode || error?.message || "unknown_error";
+    showError(`Microsoft sign-in did not complete: ${detail}`);
     elements.signInButton.disabled = false;
   }
 });
@@ -100,16 +100,16 @@ elements.signOutButton.addEventListener("click", async () => {
   const account = msalInstance.getActiveAccount();
 
   try {
-    await msalInstance.logoutPopup({ account });
-    msalInstance.setActiveAccount(null);
-    render(null);
+    await msalInstance.logoutRedirect({ account });
   } catch (error) {
     console.error(error);
-    showError("Sign-out did not complete. Close the browser tab and try again.");
+    const detail = error?.errorCode || error?.message || "unknown_error";
+    showError(`Sign-out did not complete: ${detail}`);
   }
 });
 
 initialize().catch((error) => {
   console.error(error);
-  showError("The sign-in service could not be initialized.");
+  const detail = error?.errorCode || error?.message || "unknown_error";
+  showError(`The sign-in service could not be initialized: ${detail}`);
 });
