@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="KPC Microsoft sign-in test for Smash and Erne" />
+    <title>KPC Sign-in Test</title>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="card" aria-labelledby="page-title">
+        <div class="brand-mark" aria-hidden="true">KPC</div>
+        <p class="eyebrow">Kamloops Pickleball Club</p>
+        <h1 id="page-title">Microsoft sign-in test</h1>
+
+        <div id="setup-warning" class="notice warning" hidden>
+          Add your Microsoft Entra tenant ID and application client ID in
+          <code>src/config.js</code> before testing.
+        </div>
+
+        <div id="signed-out-view">
+          <p>Sign in using the existing Microsoft 365 account for Smash or Erne.</p>
+          <button id="sign-in-button" class="primary-button" type="button">Sign in with Microsoft</button>
+          <p class="privacy-note">This app never receives or stores the Microsoft 365 password.</p>
+        </div>
+
+        <div id="signed-in-view" hidden>
+          <div class="notice success">Microsoft sign-in was successful.</div>
+          <dl class="identity-details">
+            <div><dt>Name</dt><dd id="display-name">—</dd></div>
+            <div><dt>Account</dt><dd id="username">—</dd></div>
+          </dl>
+
+          <section class="protected-panel" aria-labelledby="protected-title">
+            <p class="eyebrow">Protected screen</p>
+            <h2 id="protected-title">Welcome to the KPC test app</h2>
+            <p>This section is displayed only after Microsoft confirms the user’s identity.</p>
+          </section>
+
+          <button id="sign-out-button" class="secondary-button" type="button">Sign out</button>
+        </div>
+
+        <p id="error-message" class="notice error" role="alert" hidden></p>
+      </section>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
